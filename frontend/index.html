@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Undercover</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Écran de connexion -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-container">
+                <div class="logo">
+                    <h1>Undercover</h1>
+                    <p>noir cover</p>
+                </div>
+                
+                <div class="login-form">
+                    <div class="form-group">
+                        <label for="username">Pseudo</label>
+                        <input type="text" id="username" placeholder="Entrez votre pseudo" maxlength="20">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="roomId">Code du salon</label>
+                        <input type="text" id="roomId" placeholder="Laissez vide pour créer" maxlength="4" style="text-transform:uppercase">
+                    </div>
+                    
+                    <button id="joinButton" class="btn btn-primary">Rejoindre / Créer</button>
+                </div>
+                
+                <div class="login-info">
+                    <p>Laissez le code vide pour créer un nouveau salon</p>
+                    <p>Entrez un code pour rejoindre un salon existant</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Écran du lobby -->
+        <div id="lobbyScreen" class="screen">
+            <div class="lobby-container">
+                <div class="lobby-header">
+                    <div class="room-info">
+                        <h2>Salon <span id="roomIdDisplay">----</span></h2>
+                        <span id="playerCount">0 joueurs</span>
+                    </div>
+                    <button id="leaveLobby" class="btn btn-secondary">Quitter</button>
+                </div>
+                
+                <div class="lobby-main">
+                    <div class="players-list">
+                        <h3>Joueurs</h3>
+                        <div id="playersContainer">
+                            <!-- Joueurs affichés ici -->
+                        </div>
+                    </div>
+                    
+                    <div class="config-section">
+                        <h3>Configuration</h3>
+                        <div class="config-form">
+                            <div class="form-group">
+                                <label for="undercoverCount">Undercover</label>
+                                <input type="number" id="undercoverCount" min="1" max="5" value="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="civilianCount">Civils</label>
+                                <input type="number" id="civilianCount" min="1" max="10" value="3">
+                            </div>
+                            <div class="config-total">
+                                <span>Total: <strong id="totalPlayers">0</strong></span>
+                                <span>Joueurs: <strong id="configuredPlayers">0</strong></span>
+                            </div>
+                            <div id="configError" class="error-message"></div>
+                        </div>
+                        
+                        <button id="startGameBtn" class="btn btn-success" disabled>Lancer la partie</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Écran de jeu -->
+        <div id="gameScreen" class="screen">
+            <div class="game-container">
+                <div class="game-header">
+                    <div class="game-info">
+                        <h2>Partie en cours</h2>
+                        <span id="gamePhase">Préparation</span>
+                    </div>
+                </div>
+                
+                <div class="game-main">
+                    <!-- Phase d'affichage du rôle -->
+                    <div id="roleDisplay" class="game-phase">
+                        <div class="role-card">
+                            <div class="role-icon" id="roleIcon">●</div>
+                            <h3 id="roleTitle">Votre rôle</h3>
+                            <div class="role-word" id="roleWord">---</div>
+                            <button id="seenWordBtn" class="btn btn-primary">J'ai vu mon mot</button>
+                            <div id="waitingMessage" style="display:none;">
+                                <p>En attente des autres joueurs...</p>
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Phase d'ordre de parole -->
+                    <div id="turnOrderDisplay" class="game-phase" style="display:none;">
+                        <div class="turn-order-card">
+                            <h3>Ordre de parole</h3>
+                            <div id="turnOrderList" class="turn-order-list">
+                                <!-- Liste des joueurs -->
+                            </div>
+                            <p class="instruction">Parlez dans l'ordre indiqué, puis passez au vote</p>
+                            <button id="startVotingBtn" class="btn btn-primary">Passer au vote</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Phase de vote -->
+                    <div id="votingDisplay" class="game-phase" style="display:none;">
+                        <div class="voting-card">
+                            <h3>Votez pour éliminer un joueur</h3>
+                            <div id="votingList" class="voting-list">
+                                <!-- Liste des joueurs -->
+                            </div>
+                            <div id="voteStatus" class="vote-status">
+                                <p>En attente des votes...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Phase de révélation -->
+                    <div id="revelationDisplay" class="game-phase" style="display:none;">
+                        <div class="revelation-card">
+                            <h3>Révélation</h3>
+                            <div id="revelationContent">
+                                <!-- Contenu dynamique -->
+                            </div>
+                            <button id="continueGameBtn" class="btn btn-primary">Continuer</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Écran de fin -->
+                    <div id="gameOverDisplay" class="game-phase" style="display:none;">
+                        <div class="game-over-card">
+                            <h2 id="gameOverTitle">Fin de partie</h2>
+                            <div id="gameOverContent">
+                                <!-- Contenu dynamique -->
+                            </div>
+                            <button id="playAgainBtn" class="btn btn-primary">Rejouer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
